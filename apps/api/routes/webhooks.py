@@ -10,7 +10,7 @@ from fastapi import APIRouter, Request, HTTPException, Header, status, Depends
 from sqlalchemy.orm import Session
 from packages.razorpay.signature import verify_razorpay_signature
 from packages.database.session import get_db
-from packages.database.models import WebhookEvent, Merchant, Transaction, RevenueOpportunity, Customer, PaymentAttempt, Payment
+from packages.database.models import WebhookEvent, Merchant, RevenueOpportunity, Customer, PaymentAttempt, Payment
 from packages.database.audit_repository import AuditRepository
 from packages.shared.types import ActorType, OpportunityStatus
 from packages.agent.diagnoser import AIDiagnosticEngine
