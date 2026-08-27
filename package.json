@@ -1,0 +1,19 @@
+{
+  "name": "revaive-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "revAIve — Autonomous Revenue Recovery for Razorpay merchants",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=apps/web",
+    "build": "npm run build --workspace=apps/web",
+    "test": "pytest tests/ packages/",
+    "test:e2e": "npx playwright test"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}
