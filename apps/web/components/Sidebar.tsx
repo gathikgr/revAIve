@@ -29,7 +29,8 @@ const navSections: { title?: string; items: NavItem[] }[] = [
   {
     title: "INTELLIGENCE",
     items: [
-      { label: "Agent", href: "/agent", icon: "🤖" },
+      { label: "Agent Studio & Tester", href: "/agent-studio", icon: "⚡", badge: "LIVE" },
+      { label: "Agent Overview", href: "/agent", icon: "🤖" },
       { label: "Experiments", href: "/experiments", icon: "🧪" },
       { label: "Policy Lab", href: "/policy-lab", icon: "⚙️" },
     ],
@@ -38,7 +39,7 @@ const navSections: { title?: string; items: NavItem[] }[] = [
     title: "OPERATIONS",
     items: [
       { label: "Audit Log", href: "/audit-log", icon: "📋" },
-      { label: "Integrations", href: "/integrations", icon: "⚡" },
+      { label: "Integrations", href: "/integrations", icon: "🔌" },
     ],
   },
   {
@@ -100,7 +101,7 @@ export default function Sidebar() {
                       <span>{item.label}</span>
                     </div>
                     {item.badge && (
-                      <span className="px-1.5 py-0.5 text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded">
+                      <span className="px-1.5 py-0.5 text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded">
                         {item.badge}
                       </span>
                     )}
