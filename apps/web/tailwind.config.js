@@ -7,19 +7,25 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: '#090d16',
-        surface: '#111726',
-        'surface-border': '#1e293b',
-        accent: {
-          primary: '#10b981', // Emerald yield green
-          indigo: '#6366f1',  // Agent diagnostic indigo
-          amber: '#f59e0b',   // Pending gate amber
-          rose: '#ef4444'     // Unrecoverable red
+        background: '#0a2540',
+        surface: '#1a1f36',
+        'surface-border': '#2a2f45',
+        stripe: {
+          navy: '#0a2540',
+          dark: '#0f172a',
+          card: '#1a1f36',
+          border: '#2a2f45',
+          blurple: '#635bff',
+          'blurple-hover': '#544dc9',
+          cyan: '#00d4b2',
+          emerald: '#10b981',
+          amber: '#f59e0b',
+          rose: '#ef4444'
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'Menlo', 'monospace']
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Menlo', 'Consolas', 'monospace']
       }
     },
   },

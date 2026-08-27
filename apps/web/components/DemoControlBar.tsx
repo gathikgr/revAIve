@@ -27,9 +27,9 @@ export default function DemoControlBar() {
   };
 
   return (
-    <div className="bg-slate-900 border-b border-indigo-500/30 px-4 py-2 text-xs font-sans flex flex-col md:flex-row items-center justify-between gap-3 text-slate-300 backdrop-blur-md">
+    <div className="bg-[#0f172a] border-b border-[#2a2f45] px-6 py-2.5 text-xs font-sans flex flex-col md:flex-row items-center justify-between gap-3 text-slate-300 shadow-md">
       <div className="flex items-center gap-3">
-        <span className="px-2.5 py-0.5 text-[10px] font-black rounded-md bg-emerald-950 text-emerald-300 border border-emerald-800 uppercase tracking-wider font-mono">
+        <span className="px-2.5 py-0.5 text-[10px] font-black rounded-md bg-[#00d4b2]/10 text-[#00d4b2] border border-[#00d4b2]/30 uppercase tracking-wider font-mono">
           REAL PRODUCTION AGENT ACTIVE
         </span>
         <span className="text-[11px] text-slate-400 font-mono hidden sm:inline">
@@ -40,7 +40,7 @@ export default function DemoControlBar() {
       <div className="flex flex-wrap items-center gap-2">
         <Link
           href="/agent-studio"
-          className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-[11px] transition-all shadow-sm flex items-center gap-1.5"
+          className="px-3 py-1.5 bg-[#635bff] hover:bg-[#544dc9] text-white font-bold rounded-lg text-[11px] transition-all shadow-md flex items-center gap-1.5"
         >
           <span>⚡</span> Agent Studio & Tester
         </Link>
@@ -48,21 +48,21 @@ export default function DemoControlBar() {
         <button
           onClick={() => handleAction("Run Recovery Pipeline", "/run")}
           disabled={isProcessing}
-          className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded border border-slate-700 text-[11px] transition-all"
+          className="px-3 py-1.5 bg-[#1a1f36] hover:bg-[#2a2f45] text-slate-200 font-semibold rounded-lg border border-[#2a2f45] text-[11px] transition-all"
         >
           Run Recovery Pipeline
         </button>
 
         <Link
           href="/audit-log"
-          className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 text-[11px]"
+          className="px-3 py-1.5 bg-[#1a1f36] hover:bg-[#2a2f45] text-slate-300 rounded-lg border border-[#2a2f45] text-[11px]"
         >
           View Audit Trail
         </Link>
       </div>
 
       {statusMsg && (
-        <div className="w-full text-center py-1 bg-indigo-950/80 border border-indigo-800 text-indigo-300 text-[11px] font-mono rounded">
+        <div className="w-full text-center py-1 bg-[#635bff]/20 border border-[#635bff]/40 text-[#00d4b2] text-[11px] font-mono rounded-lg">
           {statusMsg}
         </div>
       )}
