@@ -41,8 +41,8 @@ class DeterministicDemoEngine:
         # Create Merchant
         m = Merchant(
             id="merch_demo_101",
-            name="SaaSify Technologies India Pvt Ltd",
-            razorpay_merchant_id="rzp_merch_saasify01",
+            name="Meridian Retail Commerce Pvt Ltd",
+            razorpay_merchant_id="rzp_merch_meridian01",
             webhook_secret="whsec_demo_secret_12345"
         )
         db.add(m)
@@ -122,12 +122,12 @@ class DeterministicDemoEngine:
 
     @staticmethod
     def get_or_create_base_merchant(db: Session) -> Merchant:
-        m = db.query(Merchant).filter(Merchant.razorpay_merchant_id == "rzp_merch_saasify01").first()
+        m = db.query(Merchant).filter(Merchant.razorpay_merchant_id == "rzp_merch_meridian01").first()
         if not m:
             m = Merchant(
                 id="merch_demo_101",
-                name="SaaSify Technologies India Pvt Ltd",
-                razorpay_merchant_id="rzp_merch_saasify01",
+                name="Meridian Retail Commerce Pvt Ltd",
+                razorpay_merchant_id="rzp_merch_meridian01",
                 webhook_secret="whsec_demo_secret_12345"
             )
             db.add(m)
@@ -244,7 +244,7 @@ class DeterministicDemoEngine:
             id=f"cust_s3_{uuid.uuid4().hex[:4]}",
             merchant_id=m.id,
             razorpay_customer_id=f"rzp_cust_s3_{uuid.uuid4().hex[:4]}",
-            name="SaaS Subscriber Ltd",
+            name="Apex Subscriber Ltd",
             email="billing@subscriber.in",
             risk_score=0.10
         )

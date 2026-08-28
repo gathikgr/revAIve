@@ -55,8 +55,8 @@ def get_current_merchant(authorization: Optional[str] = Header(None), db: Sessio
     if not m:
         m = Merchant(
             id="merch_demo_101",
-            name="SaaSify Technologies India Pvt Ltd",
-            razorpay_merchant_id="rzp_merch_saasify01",
+            name="Meridian Retail Commerce Pvt Ltd",
+            razorpay_merchant_id="rzp_merch_meridian01",
             webhook_secret="whsec_demo_secret_12345"
         )
         db.add(m)

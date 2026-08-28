@@ -102,7 +102,7 @@ export default function AgentPage() {
         <div className="space-y-4">
           <div className="p-4 bg-slate-950 rounded-xl border border-slate-800/80 space-y-3 text-xs">
             <div className="flex justify-between items-center border-b border-slate-800 pb-2">
-              <span className="font-mono text-indigo-400 font-bold">Decision #dec_9901 (opp_saas_001)</span>
+              <span className="font-mono text-indigo-400 font-bold">Decision #dec_9901 (opp_merch_001)</span>
               <span className="text-slate-500 font-mono">2026-08-27 13:45:10 UTC</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -120,7 +120,7 @@ export default function AgentPage() {
               </div>
               <div>
                 <span className="text-slate-500 font-bold block mb-1">ACTION & OUTCOME</span>
-                <p className="text-slate-300 font-mono">Dispatched DELAYED_RETRY (Key: rev_act_opp_saas_001_att1) → SUCCESS</p>
+                <p className="text-slate-300 font-mono">Dispatched DELAYED_RETRY (Key: rev_act_opp_merch_001_att1) → SUCCESS</p>
               </div>
             </div>
           </div>

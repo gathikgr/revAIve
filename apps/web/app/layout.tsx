@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
-import DemoControlBar from "@/components/DemoControlBar";
 import { RoleProvider } from "../context/RoleContext";
 
 export const metadata: Metadata = {
@@ -20,7 +19,6 @@ export default function RootLayout({
         <RoleProvider>
           <Sidebar />
           <main className="flex-1 flex flex-col overflow-x-hidden min-h-screen">
-            <DemoControlBar />
             <div className="flex-1">
               {children}
             </div>
@@ -30,4 +28,3 @@ export default function RootLayout({
     </html>
   );
 }
-

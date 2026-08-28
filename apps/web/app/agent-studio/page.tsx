@@ -12,8 +12,8 @@ const FAILURE_CODES = [
 
 export default function AgentStudioPage() {
   // Config Form State
-  const [merchantName, setMerchantName] = useState("SaaSify Technologies India Pvt Ltd");
-  const [razorpayMerchantId, setRazorpayMerchantId] = useState("rzp_merch_live01");
+  const [merchantName, setMerchantName] = useState("Meridian Retail Commerce Pvt Ltd");
+  const [razorpayMerchantId, setRazorpayMerchantId] = useState("rzp_merch_meridian01");
   const [customerName, setCustomerName] = useState("Acme Software Pvt Ltd");
   const [customerEmail, setCustomerEmail] = useState("billing@acme.in");
   const [customerPhone, setCustomerPhone] = useState("+91 98765 43210");

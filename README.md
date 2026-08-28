@@ -9,7 +9,7 @@
 
 ## Problem
 
-Payment failures silently erode recurring SaaS revenue. For Indian merchants processing payments via Razorpay, payment failures occur across five primary vectors:
+Payment failures silently erode recurring merchant and subscription revenue. For Indian merchants processing payments via Razorpay, payment failures occur across five primary vectors:
 1. **Insufficient Funds / Soft Declines:** Temporary liquidity shortfalls near billing dates (45% of leakage).
 2. **Transient Bank Maintenance Outages:** Core banking system maintenance windows at major issuing banks like HDFC, ICICI, or SBI (30% of leakage).
 3. **Expired Card Instruments:** Expired credit/debit cards where auto-debit mandates fail (15% of leakage).

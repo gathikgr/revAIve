@@ -39,7 +39,7 @@ def generate_seed_data(db: Session):
     # 1. Merchants (5)
     print("[2/8] Generating 5 Merchants...")
     merchant_configs = [
-        ("SaaSify Technologies India Pvt Ltd", "rzp_merch_saasify01"),
+        ("Meridian Retail Commerce Pvt Ltd", "rzp_merch_meridian01"),
         ("CloudScale Enterprise Solutions", "rzp_merch_cloudscale02"),
         ("EdTech Academy Online", "rzp_merch_edtech03"),
         ("FinPay Payments Ltd", "rzp_merch_finpay04"),

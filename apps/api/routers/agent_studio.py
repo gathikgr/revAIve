@@ -22,8 +22,8 @@ router = APIRouter(prefix="/agent-studio", tags=["Agent Studio"])
 
 
 class ScenarioInputSchema(BaseModel):
-    merchant_name: str = Field("SaaSify Technologies India Pvt Ltd", description="Merchant Organization Name")
-    razorpay_merchant_id: str = Field("rzp_merch_live01", description="Razorpay Merchant Account ID")
+    merchant_name: str = Field("Meridian Retail Commerce Pvt Ltd", description="Merchant Organization Name")
+    razorpay_merchant_id: str = Field("rzp_merch_meridian01", description="Razorpay Merchant Account ID")
     customer_name: str = Field("Acme Software Pvt Ltd", description="Customer Name")
     customer_email: str = Field("billing@acme.in", description="Customer Email")
     customer_phone: str = Field("+91 98765 43210", description="Customer Phone")

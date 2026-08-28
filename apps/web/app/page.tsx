@@ -475,7 +475,7 @@ function AdminAgentMonitor() {
           <div><span className="text-[#6b7c93]">[19:02:11]</span> <span className="text-[#635bff] font-bold">DIAGNOSER:</span> Match found for signature error code Insufficient Funds. Confidence 88%.</div>
           <div><span className="text-[#6b7c93]">[19:02:11]</span> <span className="text-[#635bff] font-bold">RECOVERY_TWIN:</span> Evaluated 5 options. Selected: "payment_request" (EV ₹73,050).</div>
           <div><span className="text-[#6b7c93]">[19:02:12]</span> <span className="text-[#635bff] font-bold">POLICY_GUARD:</span> Verified quiet period delay & max retry threshold. Verdict: ALLOW.</div>
-          <div><span className="text-[#6b7c93]">[19:02:12]</span> <span className="text-[#635bff] font-bold">EXECUTOR:</span> Action dispatched. Generated unique idempotency key: <span className="text-indigo-600">rev_act_opp_saas_001_att1</span>.</div>
+          <div><span className="text-[#6b7c93]">[19:02:12]</span> <span className="text-[#635bff] font-bold">EXECUTOR:</span> Action dispatched. Generated unique idempotency key: <span className="text-indigo-600">rev_act_opp_merch_001_att1</span>.</div>
         </div>
       </div>
     </div>

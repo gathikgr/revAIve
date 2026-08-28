@@ -80,7 +80,7 @@ export default function Sidebar() {
   const currentProfileName = () => {
     if (role === "customer") return "Acme Customer Account";
     if (role === "admin") return "revAIve Core AI Admin";
-    return "SaaSify Merchant Account";
+    return "Meridian Retail Merchant";
   };
 
   const currentProfileIcon = () => {
@@ -140,7 +140,7 @@ export default function Sidebar() {
                   role === "merchant" ? "bg-[#635bff]/5 text-[#635bff]" : ""
                 }`}
               >
-                <span>🏢</span> SaaSify Merchant Account
+                <span>🏢</span> Meridian Retail Merchant
               </button>
               <button
                 onClick={() => {
@@ -209,7 +209,7 @@ export default function Sidebar() {
       {/* Footer Operator Info */}
       <div className="p-4 border-t border-[#e6ebf1] bg-[#f6f9fc] text-xs text-[#6b7c93] flex items-center justify-between">
         <div>
-          <div className="font-semibold text-[#32325d] text-[11px]">SaaSify Tech Ltd</div>
+          <div className="font-semibold text-[#32325d] text-[11px]">Meridian Retail Pvt Ltd</div>
           <div className="text-[10px] text-[#6b7c93] font-mono">Mode: {role.toUpperCase()}</div>
         </div>
         <span className="px-2 py-0.5 text-[10px] bg-white text-[#6b7c93] rounded font-mono border border-[#e6ebf1]">v1.2.0</span>
