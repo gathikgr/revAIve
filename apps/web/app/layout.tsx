@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import DemoControlBar from "@/components/DemoControlBar";
+import { RoleProvider } from "../context/RoleContext";
 
 export const metadata: Metadata = {
   title: "revAIve — Autonomous Revenue Recovery for Razorpay",
@@ -16,14 +17,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-[#f6f9fc] text-[#32325d] antialiased font-sans flex min-h-screen">
-        <Sidebar />
-        <main className="flex-1 flex flex-col overflow-x-hidden min-h-screen">
-          <DemoControlBar />
-          <div className="flex-1">
-            {children}
-          </div>
-        </main>
+        <RoleProvider>
+          <Sidebar />
+          <main className="flex-1 flex flex-col overflow-x-hidden min-h-screen">
+            <DemoControlBar />
+            <div className="flex-1">
+              {children}
+            </div>
+          </main>
+        </RoleProvider>
       </body>
     </html>
   );
 }
+
