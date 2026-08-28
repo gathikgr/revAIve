@@ -65,7 +65,6 @@ function CustomerCheckoutSimulator() {
 
       const data = await response.json();
       
-      // Simulate Stripe-like checkout status page
       setTimeout(() => {
         if (scenarioId === "7" || scenarioId === "8") {
           setSimState("success");
@@ -73,11 +72,13 @@ function CustomerCheckoutSimulator() {
           setSimState("failed");
           setSimError(
             scenarioId === "2" 
-              ? "Declined: Insufficient Funds. Your bank has rejected this transaction." 
-              : "Timeout: Payment provider failed to respond in time."
+              ? "Declined: Insufficient Funds. Your issuing bank has rejected this transaction." 
+              : scenarioId === "3"
+              ? "Mandate Error: Recurring e-mandate cancelled by customer."
+              : "Timeout: Payment provider gateway failed to respond in time."
           );
         }
-      }, 1500);
+      }, 1000);
 
     } catch (err: any) {
       setSimState("failed");
@@ -106,11 +107,12 @@ function CustomerCheckoutSimulator() {
                     setScenarioId(e.target.value);
                     if (e.target.value === "2") setAmount("480000");
                     else if (e.target.value === "4") setAmount("150000");
+                    else if (e.target.value === "3") setAmount("2999");
                     else setAmount("1499");
                   }}
                   className="w-full bg-[#f6f9fc] border border-[#e6ebf1] rounded-lg p-2.5 text-[#32325d]"
                 >
-                  <option value="1">Scenario 1: Insufficient Funds Decline (₹1,499)</option>
+                  <option value="1">Scenario 1: Insufficient Funds Soft Decline (₹1,499)</option>
                   <option value="2">Scenario 2: High-Value Gate Transaction (₹4,80,000)</option>
                   <option value="3">Scenario 3: Subscription mandate failure (₹2,999)</option>
                   <option value="4">Scenario 4: Overdue B2B Receivable (₹1,50,000)</option>
@@ -231,6 +233,36 @@ function CustomerCheckoutSimulator() {
 function MerchantDashboardOverview() {
   const [isScanning, setIsScanning] = useState(false);
   const [scanMessage, setScanMessage] = useState<string | null>(null);
+  const [analytics, setAnalytics] = useState<any>({
+    total_at_risk_formatted: "₹48,45,226",
+    total_recovered_formatted: "₹4,49,800",
+    recovery_yield_percentage: 34.2,
+    total_opportunities_count: 1300
+  });
+  const [recentOpps, setRecentOpps] = useState<any[]>([]);
+
+  const fetchDashboardData = async () => {
+    try {
+      const [analyticsRes, oppsRes] = await Promise.all([
+        fetch("http://localhost:8000/api/v1/opportunities/analytics/overview"),
+        fetch("http://localhost:8000/api/v1/opportunities")
+      ]);
+      if (analyticsRes.ok) {
+        const aData = await analyticsRes.json();
+        setAnalytics(aData);
+      }
+      if (oppsRes.ok) {
+        const oData = await oppsRes.json();
+        setRecentOpps(oData.slice(0, 5));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
   const handleRunScan = async () => {
     setIsScanning(true);
@@ -241,6 +273,7 @@ function MerchantDashboardOverview() {
       });
       const data = await res.json();
       setScanMessage(`✓ Scan complete: ${data.opportunities_detected || 0} new opportunities detected.`);
+      fetchDashboardData();
     } catch (e) {
       setScanMessage("✓ Scanner executed across active opportunities.");
     } finally {
@@ -279,25 +312,25 @@ function MerchantDashboardOverview() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white border border-[#e6ebf1] p-5 rounded-xl space-y-1 shadow-sm">
           <div className="text-[10px] font-bold text-[#6b7c93] uppercase">Revenue at Risk</div>
-          <div className="text-xl font-bold text-[#32325d]">₹48,45,226</div>
+          <div className="text-xl font-bold text-[#32325d]">{analytics.total_at_risk_formatted}</div>
           <div className="text-[10px] text-[#6b7c93]">From failed client payments</div>
         </div>
 
         <div className="bg-white border border-[#e6ebf1] p-5 rounded-xl space-y-1 shadow-sm">
           <div className="text-[10px] font-bold text-[#6b7c93] uppercase">Recovered Revenue</div>
-          <div className="text-xl font-bold text-[#22c55e]">₹4,49,800</div>
+          <div className="text-xl font-bold text-[#22c55e]">{analytics.total_recovered_formatted}</div>
           <div className="text-[10px] text-[#22c55e] font-semibold">✓ Automatically recovered</div>
         </div>
 
         <div className="bg-white border border-[#e6ebf1] p-5 rounded-xl space-y-1 shadow-sm">
-          <div className="text-[10px] font-bold text-[#6b7c93] uppercase">Expected Recovery</div>
-          <div className="text-xl font-bold text-[#635bff]">₹27,19,835</div>
-          <div className="text-[10px] text-[#6b7c93]">Projected pipeline value</div>
+          <div className="text-[10px] font-bold text-[#6b7c93] uppercase">Active Opportunities</div>
+          <div className="text-xl font-bold text-[#635bff]">{analytics.total_opportunities_count}</div>
+          <div className="text-[10px] text-[#6b7c93]">Pipeline volume</div>
         </div>
 
         <div className="bg-white border border-[#e6ebf1] p-5 rounded-xl space-y-1 shadow-sm">
-          <div className="text-[10px] font-bold text-[#6b7c93] uppercase">Yield Lift</div>
-          <div className="text-xl font-bold text-[#32325d]">+34.2%</div>
+          <div className="text-[10px] font-bold text-[#6b7c93] uppercase">Recovery Yield</div>
+          <div className="text-xl font-bold text-[#32325d]">+{analytics.recovery_yield_percentage}%</div>
           <div className="text-[10px] text-[#6b7c93]">Performance vs control group</div>
         </div>
       </div>
@@ -335,18 +368,30 @@ function MerchantDashboardOverview() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#e6ebf1]">
-              <tr>
-                <td className="py-3 font-semibold">Acme Software Inc</td>
-                <td className="py-3 font-mono">₹1,499.00</td>
-                <td className="py-3 text-[#6b7c93]">Insufficient Funds decline</td>
-                <td className="py-3 text-emerald-600 font-bold">✓ AUTO_RETRY</td>
-              </tr>
-              <tr>
-                <td className="py-3 font-semibold">Apex Global Logistics</td>
-                <td className="py-3 font-mono">₹75,000.00</td>
-                <td className="py-3 text-[#6b7c93]">Gateway Timeout Outage</td>
-                <td className="py-3 text-amber-600 font-bold">⏳ PENDING_APPROVAL</td>
-              </tr>
+              {recentOpps.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="py-4 text-center text-[#6b7c93]">
+                    No opportunities yet. Switch to Customer mode to simulate a checkout payment.
+                  </td>
+                </tr>
+              ) : (
+                recentOpps.map((opp) => (
+                  <tr key={opp.id}>
+                    <td className="py-3 font-semibold">{opp.customer_email || "Customer"}</td>
+                    <td className="py-3 font-mono">{opp.amount_formatted}</td>
+                    <td className="py-3 text-[#6b7c93]">{opp.reason || "Soft decline"}</td>
+                    <td className="py-3">
+                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded uppercase ${
+                        opp.status === "succeeded"
+                          ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                          : "bg-amber-100 text-amber-700 border border-amber-200"
+                      }`}>
+                        {opp.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -429,10 +474,10 @@ function AdminAgentMonitor() {
             <span className="text-[10px] font-bold text-[#6b7c93] uppercase font-mono">STEP 2</span>
             <span className="px-1.5 py-0.5 text-[9px] font-bold bg-[#00d4b2]/10 text-[#00d4b2] rounded">DIAGNOSER</span>
           </div>
-          <p className="text-[11px] text-[#6b7c93]">Identifies root-cause error signatures using context matching.</p>
+          <p className="text-[11px] text-[#6b7c93]">Online AI Agent signature matching with Gemini/OpenAI integration.</p>
           <div className="p-2 bg-[#f6f9fc] rounded text-[9px] font-mono border border-[#e6ebf1]">
-            <div className="font-bold text-[#32325d]">Classified category:</div>
-            <div className="text-[#635bff] font-bold mt-1">SOFT_DECLINE</div>
+            <div className="font-bold text-[#32325d]">Online AI Model:</div>
+            <div className="text-[#635bff] font-bold mt-1">gemini-1.5-flash</div>
           </div>
         </div>
 

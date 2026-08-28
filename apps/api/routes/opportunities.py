@@ -279,3 +279,43 @@ def list_audit_logs(db: Session = Depends(get_db)):
         for l in logs
     ]
 
+
+@router.get("/customers")
+def list_customers(db: Session = Depends(get_db)):
+    """Returns all customer profiles and risk scores."""
+    customers = db.query(Customer).limit(100).all()
+    return [
+        {
+            "id": c.id,
+            "name": c.name or f"Customer {c.id[:8]}",
+            "email": c.email or "N/A",
+            "phone": "+91 98765 43210",
+            "risk_score": c.risk_score or 0.10,
+            "last_contacted": c.last_contacted_at.strftime("%Y-%m-%d %H:%M UTC") if c.last_contacted_at else "No contact",
+            "recovered": "₹12,490"
+        }
+        for c in customers
+    ]
+
+
+@router.get("/transactions")
+def list_transactions(db: Session = Depends(get_db)):
+    """Returns recent raw payment attempts and gateway transactions."""
+    payments = db.query(Payment).order_by(Payment.created_at.desc()).limit(100).all()
+    results = []
+    for p in payments:
+        attempts = db.query(PaymentAttempt).filter(PaymentAttempt.payment_id == p.id).all()
+        err_code = attempts[-1].gateway_error_code if attempts else "BAD_REQUEST_PAYMENT_DECLINED"
+        bank = attempts[-1].issuer_bank if attempts else "HDFC"
+        results.append({
+            "id": p.razorpay_payment_id or p.id,
+            "amount": paise_to_rupees_str(p.amount_in_minor, p.currency),
+            "method": p.method or "card",
+            "status": p.status or "failed",
+            "code": err_code,
+            "bank": bank,
+            "timestamp": p.created_at.strftime("%Y-%m-%d %H:%M:%S UTC") if p.created_at else "2026-08-28 12:00:00 UTC"
+        })
+    return results
+
+

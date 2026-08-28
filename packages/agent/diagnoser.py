@@ -4,6 +4,7 @@ Determines the most likely cause behind at-risk revenue using finite documented 
 Defends against prompt injection by isolating untrusted customer input in non-executable data blocks.
 """
 
+import os
 from typing import Dict, Any, Optional
 from sqlalchemy.orm import Session
 
@@ -82,7 +83,9 @@ class RevAiVeDiagnosis:
             "amount_at_risk": opportunity.amount_at_risk,
             "currency": opportunity.currency,
             "sanitized_xml_context": sanitized_context.strip(),
-            "customer_risk_score": cust_ctx.get("risk_score", 0.0)
+            "customer_risk_score": cust_ctx.get("risk_score", 0.0),
+            "ai_agent_provider": "gemini-1.5-flash" if os.environ.get("GEMINI_API_KEY") else "revaive_diagnostic_agent",
+            "online_mode": bool(os.environ.get("GEMINI_API_KEY") or os.environ.get("OPENAI_API_KEY"))
         }
 
         # Save Diagnosis record in DB
