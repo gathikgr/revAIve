@@ -459,3 +459,135 @@ class IntegrationConnection(Base):
     created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
 
     merchant = relationship("Merchant", back_populates="connections")
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    merchant_id = Column(String(36), ForeignKey("merchants.id"), nullable=False)
+    email = Column(String(255), nullable=False, unique=True)
+    password_hash = Column(String(255), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    merchant = relationship("Merchant")
+
+
+class Transaction(Base):
+    __tablename__ = "transactions"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    merchant_id = Column(String(36), ForeignKey("merchants.id"), nullable=False)
+    customer_id = Column(String(36), ForeignKey("customers.id"), nullable=False)
+    amount_in_minor = Column(BigInteger, nullable=False)
+    currency = Column(String(3), default="INR", nullable=False)
+    status = Column(String(32), nullable=False)  # pending, succeeded, failed, refunded
+    source_type = Column(String(64), nullable=False)  # payment, receivable, subscription
+    source_id = Column(String(128), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+
+class CheckoutSession(Base):
+    __tablename__ = "checkout_sessions"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    merchant_id = Column(String(36), ForeignKey("merchants.id"), nullable=False)
+    customer_id = Column(String(36), ForeignKey("customers.id"), nullable=True)
+    session_token = Column(String(255), nullable=False, unique=True)
+    cart_amount = Column(BigInteger, nullable=False)
+    currency = Column(String(3), default="INR", nullable=False)
+    status = Column(String(32), nullable=False)  # STARTED, PAYMENT_INITIATED, PAYMENT_FAILED, ABANDONED, COMPLETED, EXPIRED
+    session_depth = Column(Integer, default=1, nullable=False)
+    last_activity_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+
+
+class Receivable(Base):
+    __tablename__ = "receivables"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    merchant_id = Column(String(36), ForeignKey("merchants.id"), nullable=False)
+    customer_id = Column(String(36), ForeignKey("customers.id"), nullable=False)
+    invoice_id = Column(String(36), ForeignKey("invoices.id"), nullable=True)
+    amount_in_minor = Column(BigInteger, nullable=False)
+    currency = Column(String(3), default="INR", nullable=False)
+    due_date = Column(DateTime(timezone=True), nullable=False)
+    days_overdue = Column(Integer, default=0, nullable=False)
+    status = Column(String(32), nullable=False)  # DUE, OVERDUE, PROMISED, PROMISE_DUE, PROMISE_BROKEN, PAID, ESCALATED, WRITTEN_OFF
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+
+class PromiseToPay(Base):
+    __tablename__ = "promises_to_pay"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    merchant_id = Column(String(36), ForeignKey("merchants.id"), nullable=False)
+    customer_id = Column(String(36), ForeignKey("customers.id"), nullable=False)
+    receivable_id = Column(String(36), ForeignKey("receivables.id"), nullable=True)
+    amount_in_minor = Column(BigInteger, nullable=False)
+    currency = Column(String(3), default="INR", nullable=False)
+    promise_date = Column(DateTime(timezone=True), nullable=False)
+    follow_up_date = Column(DateTime(timezone=True), nullable=False)
+    status = Column(String(32), nullable=False)  # PROMISED, UPCOMING, DUE, PAID, BROKEN, ESCALATED
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+
+class RecoveryTwinEvaluation(Base):
+    __tablename__ = "recovery_twin_evaluations"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    opportunity_id = Column(String(36), ForeignKey("revenue_opportunities.id"), nullable=False)
+    recommended_action = Column(String(64), nullable=False)
+    evaluated_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    candidates = relationship("RecoveryCandidate", back_populates="evaluation", cascade="all, delete-orphan")
+
+
+class RecoveryCandidate(Base):
+    __tablename__ = "recovery_candidates"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    evaluation_id = Column(String(36), ForeignKey("recovery_twin_evaluations.id"), nullable=False)
+    action_type = Column(String(64), nullable=False)  # do_nothing, retry_now, retry_later, payment_request, human_review
+    recovery_likelihood = Column(Numeric(3, 2), nullable=False)
+    expected_recovery = Column(BigInteger, nullable=False)
+    intervention_cost = Column(BigInteger, nullable=False)
+    customer_fatigue = Column(Numeric(3, 2), nullable=False)
+    risk_score = Column(Numeric(3, 2), nullable=False)
+    time_to_recovery_seconds = Column(Integer, nullable=False)
+    policy_eligible = Column(Boolean, default=True, nullable=False)
+    expected_net_recovery = Column(BigInteger, nullable=False)
+
+    evaluation = relationship("RecoveryTwinEvaluation", back_populates="candidates")
+
+
+class SimulationScenario(Base):
+    __tablename__ = "simulation_scenarios"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    name = Column(String(128), nullable=False)
+    description = Column(Text, nullable=True)
+    scenario_type = Column(String(64), nullable=False)  # payment_failure, subscription_failure, overdue_receivable, broken_promise, etc.
+    parameters = Column(JSON, nullable=False)
+
+
+class SimulationRun(Base):
+    __tablename__ = "simulation_runs"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    scenario_id = Column(String(36), ForeignKey("simulation_scenarios.id"), nullable=False)
+    status = Column(String(32), nullable=False)  # pending, completed, failed
+    started_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+    completed_at = Column(DateTime(timezone=True), nullable=True)
+
+
+class SimulationEvent(Base):
+    __tablename__ = "simulation_events"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    run_id = Column(String(36), ForeignKey("simulation_runs.id"), nullable=False)
+    event_type = Column(String(64), nullable=False)
+    payload = Column(JSON, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+

@@ -8,11 +8,12 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from packages.database.session import get_db
-from packages.database.models import RevenueOpportunity, Payment, Customer, RecoveryStrategy, AuditEvent, RecoveryAction, RecoveryOutcome
+from packages.database.models import RevenueOpportunity, Payment, Customer, RecoveryStrategy, AuditEvent, RecoveryAction, RecoveryOutcome, Merchant
 from packages.database.audit_repository import AuditRepository
-from packages.shared.types import OpportunityStatus
+from packages.shared.types import ActorType, OpportunityStatus
 from packages.shared.currency import paise_to_rupees_str
 from packages.razorpay.client import RazorpayClient
+from apps.api.routers.auth import get_current_merchant
 
 router = APIRouter(prefix="/api/v1", tags=["Opportunities & Operations"])
 
@@ -41,9 +42,10 @@ class OpportunityResponse(BaseModel):
 @router.get("/opportunities", response_model=List[OpportunityResponse])
 def list_opportunities(
     status_filter: Optional[str] = Query(None, alias="status"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_merchant: Merchant = Depends(get_current_merchant)
 ):
-    query = db.query(RevenueOpportunity)
+    query = db.query(RevenueOpportunity).filter(RevenueOpportunity.merchant_id == current_merchant.id)
     if status_filter:
         query = query.filter(RevenueOpportunity.status == status_filter)
 
@@ -78,8 +80,15 @@ def list_opportunities(
 
 
 @router.get("/opportunities/{opportunity_id}")
-def get_opportunity_detail(opportunity_id: str, db: Session = Depends(get_db)):
-    opp = db.query(RevenueOpportunity).filter(RevenueOpportunity.id == opportunity_id).first()
+def get_opportunity_detail(
+    opportunity_id: str,
+    db: Session = Depends(get_db),
+    current_merchant: Merchant = Depends(get_current_merchant)
+):
+    opp = db.query(RevenueOpportunity).filter(
+        RevenueOpportunity.id == opportunity_id,
+        RevenueOpportunity.merchant_id == current_merchant.id
+    ).first()
     if not opp:
         raise HTTPException(status_code=404, detail="Opportunity not found")
 
@@ -249,3 +258,24 @@ def get_overview_analytics(db: Session = Depends(get_db)):
         "active_interventions_count": active_interventions,
         "total_opportunities_count": len(all_opps)
     }
+
+
+@router.get("/audit-logs")
+def list_audit_logs(db: Session = Depends(get_db)):
+    """Retrieves all append-only system audit log events."""
+    logs = db.query(AuditEvent).order_by(AuditEvent.timestamp.desc()).limit(100).all()
+    return [
+        {
+            "id": l.id,
+            "timestamp": l.timestamp.isoformat(),
+            "actor_type": l.actor_type,
+            "actor_id": l.actor_id,
+            "action": l.action,
+            "entity_type": l.entity_type,
+            "entity_id": l.entity_id,
+            "result": l.after_state.get("status") if l.after_state else "SUCCESS",
+            "metadata": l.metadata_json or {}
+        }
+        for l in logs
+    ]
+

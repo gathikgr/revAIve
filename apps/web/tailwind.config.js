@@ -7,20 +7,23 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: '#0a2540',
-        surface: '#1a1f36',
-        'surface-border': '#2a2f45',
+        background: '#f6f9fc',
+        surface: '#ffffff',
+        'surface-border': '#e6ebf1',
         stripe: {
-          navy: '#0a2540',
-          dark: '#0f172a',
-          card: '#1a1f36',
-          border: '#2a2f45',
+          navy: '#32325d',
+          dark: '#1c202c',
+          card: '#ffffff',
+          border: '#e6ebf1',
           blurple: '#635bff',
           'blurple-hover': '#544dc9',
           cyan: '#00d4b2',
-          emerald: '#10b981',
+          emerald: '#22c55e',
           amber: '#f59e0b',
-          rose: '#ef4444'
+          rose: '#ef4444',
+          textPrimary: '#32325d',
+          textSecondary: '#6b7c93',
+          bgLight: '#f6f9fc'
         }
       },
       fontFamily: {

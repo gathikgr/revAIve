@@ -213,3 +213,26 @@ async def run_agent_scenario(input_data: ScenarioInputSchema, db: Session = Depe
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Agent Studio scenario execution failed: {str(e)}"
         )
+
+
+class VoiceScriptRequest(BaseModel):
+    language: str
+    customer_name: str
+    merchant_name: str
+    amount_str: str
+    cause_code: str
+    metadata: Dict[str, Any] = {}
+
+
+@router.post("/voice/generate")
+def generate_voice_script(req: VoiceScriptRequest):
+    from packages.shared.voice_generator import MultilingualVoiceGenerator
+    return MultilingualVoiceGenerator.generate_script(
+        language=req.language,
+        customer_name=req.customer_name,
+        merchant_name=req.merchant_name,
+        amount_str=req.amount_str,
+        cause_code=req.cause_code,
+        metadata=req.metadata
+    )
+

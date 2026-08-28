@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 body {
-  background-color: #0a2540;
-  color: #f8fafc;
+  background-color: #f6f9fc;
+  color: #32325d;
   min-height: 100vh;
 }
 
@@ -14,14 +14,25 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0a2540;
+  background: #f6f9fc;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2a2f45;
+  background: #cfd7df;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: #635bff;
+}
+
+/* Custom transitions and utility styles */
+.stripe-shadow {
+  box-shadow: 0 4px 6px rgba(50,50,93,0.11), 0 1px 3px rgba(0,0,0,0.08);
+}
+.stripe-shadow-sm {
+  box-shadow: 0 1px 3px rgba(50,50,93,0.15), 0 1px 0 rgba(0,0,0,0.02);
+}
+.stripe-border {
+  border: 1px solid #e6ebf1;
 }

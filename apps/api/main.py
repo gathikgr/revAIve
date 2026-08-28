@@ -12,6 +12,7 @@ from apps.api.routes.opportunities import router as opportunities_router
 from apps.api.routers.policy_lab import router as policy_lab_router
 from apps.api.routers.demo import router as demo_router
 from apps.api.routers.agent_studio import router as agent_studio_router
+from apps.api.routers.auth import router as auth_router
 
 # Initialize database schema tables
 Base.metadata.create_all(bind=engine)
@@ -37,6 +38,7 @@ app.include_router(opportunities_router)
 app.include_router(policy_lab_router, prefix="/api/v1")
 app.include_router(demo_router, prefix="/api/v1")
 app.include_router(agent_studio_router, prefix="/api/v1")
+app.include_router(auth_router, prefix="/api/v1")
 
 
 @app.get("/health")

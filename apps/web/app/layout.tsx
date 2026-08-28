@@ -15,7 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="bg-slate-950 text-slate-100 antialiased font-sans flex min-h-screen">
+      <body className="bg-[#f6f9fc] text-[#32325d] antialiased font-sans flex min-h-screen">
         <Sidebar />
         <main className="flex-1 flex flex-col overflow-x-hidden min-h-screen">
           <DemoControlBar />

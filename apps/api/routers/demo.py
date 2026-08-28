@@ -1,7 +1,6 @@
 """
-revAIve FastAPI Router — Demo Controls Endpoints
-Provides developer/demo controls for reproducible scenario execution.
-Only available when environment is DEMO.
+revAIve FastAPI Router — Demo Scenarios & Simulation Controls
+Provides endpoints to trigger scenarios individually or as a batch.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -10,8 +9,6 @@ from typing import Dict, Any
 
 from packages.database.session import get_db
 from packages.shared.demo.engine import DeterministicDemoEngine
-from packages.database.models import WebhookEvent, RevenueOpportunity, Payment
-from packages.database.audit_repository import AuditRepository
 
 router = APIRouter(prefix="/demo", tags=["Demo Controls"])
 
@@ -28,67 +25,76 @@ def reset_demo_scenario(seed: int = 42, db: Session = Depends(get_db)):
         )
 
 
-@router.post("/run")
-async def run_demo_pipeline(merchant_id: str = "merch_demo_101", db: Session = Depends(get_db)):
-    """Executes the full 14-step pipeline sequence across demo opportunities."""
+@router.post("/scenarios/{scenario_id}")
+def run_scenario(scenario_id: int, db: Session = Depends(get_db)):
+    """
+    Executes a specific persistent demonstration scenario (1 to 9).
+    """
     try:
-        return await DeterministicDemoEngine.run_demo_pipeline_sequence(db, merchant_id=merchant_id)
+        if scenario_id == 1:
+            return DeterministicDemoEngine.run_scenario_1_returning_transient(db)
+        elif scenario_id == 2:
+            return DeterministicDemoEngine.run_scenario_2_high_value_gate(db, approved=False)
+        elif scenario_id == 22:
+            # Gated approval scenario retry
+            return DeterministicDemoEngine.run_scenario_2_high_value_gate(db, approved=True)
+        elif scenario_id == 3:
+            return DeterministicDemoEngine.run_scenario_3_failed_subscription(db)
+        elif scenario_id == 4:
+            return DeterministicDemoEngine.run_scenario_4_overdue_b2b(db)
+        elif scenario_id == 5:
+            return DeterministicDemoEngine.run_scenario_5_checkout_abandonment(db)
+        elif scenario_id == 6:
+            return DeterministicDemoEngine.run_scenario_6_provider_timeout(db)
+        elif scenario_id == 7:
+            return DeterministicDemoEngine.run_scenario_7_customer_fatigue(db)
+        elif scenario_id == 8:
+            return DeterministicDemoEngine.run_scenario_8_hinglish_voice(db, lang="hinglish")
+        elif scenario_id == 9:
+            return DeterministicDemoEngine.run_scenario_9_promise_to_pay(db, broken=True)
+        else:
+            raise HTTPException(status_code=400, detail=f"Invalid scenario_id {scenario_id}")
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Demo pipeline execution failed: {str(e)}"
+            detail=f"Scenario execution failed: {str(e)}"
         )
 
 
-@router.post("/inject-failure")
-def inject_provider_failure(merchant_id: str = "merch_demo_101", db: Session = Depends(get_db)):
-    """Injects a controlled provider gateway timeout failure."""
-    p_fail = Payment(
-        merchant_id=merchant_id,
-        customer_id="cust_demo_01",
-        razorpay_payment_id=f"pay_inject_{int(db.query(Payment).count())+100}",
-        amount_in_minor=499900,
-        currency="INR",
-        status="failed",
-        method="card"
-    )
-    db.add(p_fail)
-    db.commit()
-
-    AuditRepository.log_event(
-        db=db,
-        actor_type="system_worker",
-        actor_id="demo_controls",
-        action="INJECTED_PROVIDER_FAILURE",
-        entity_type="Payment",
-        entity_id=p_fail.id,
-        after_state={"status": "failed", "error_code": "GATEWAY_TIMEOUT"},
-        metadata={"environment": "DEMO"}
-    )
-
-    return {
-        "status": "injected",
-        "payment_id": p_fail.id,
-        "error_code": "GATEWAY_TIMEOUT",
-        "message": "Controlled provider timeout injected into pipeline."
-    }
-
-
-@router.post("/inject-duplicate-webhook")
-def inject_duplicate_webhook(db: Session = Depends(get_db)):
-    """Injects duplicate webhook payload to test replay defense."""
+@router.post("/run-all")
+def run_all_scenarios(db: Session = Depends(get_db)):
+    """Executes all 9 demonstration scenarios as a batch."""
+    results = {}
     try:
-        evt = WebhookEvent(
-            provider="razorpay",
-            event_id="evt_demo_dup_100",
-            event_type="payment.failed",
-            payload_hash="hash_dup",
-            raw_payload={"id": "evt_demo_dup_100"},
-            processing_status="duplicate"
+        results["scenario_1"] = DeterministicDemoEngine.run_scenario_1_returning_transient(db)
+        results["scenario_2"] = DeterministicDemoEngine.run_scenario_2_high_value_gate(db, approved=False)
+        results["scenario_3"] = DeterministicDemoEngine.run_scenario_3_failed_subscription(db)
+        results["scenario_4"] = DeterministicDemoEngine.run_scenario_4_overdue_b2b(db)
+        results["scenario_5"] = DeterministicDemoEngine.run_scenario_5_checkout_abandonment(db)
+        results["scenario_6"] = DeterministicDemoEngine.run_scenario_6_provider_timeout(db)
+        results["scenario_7"] = DeterministicDemoEngine.run_scenario_7_customer_fatigue(db)
+        results["scenario_8"] = DeterministicDemoEngine.run_scenario_8_hinglish_voice(db)
+        results["scenario_9"] = DeterministicDemoEngine.run_scenario_9_promise_to_pay(db, broken=True)
+        return {"status": "success", "message": "All scenarios processed.", "results": results}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Batch scenarios run failed: {str(e)}"
         )
-        db.add(evt)
-        db.commit()
-        return {"status": "injected", "event_id": evt.event_id, "message": "Duplicate webhook event logged cleanly."}
-    except Exception:
-        db.rollback()
-        return {"status": "rejected", "message": "Duplicate webhook event rejected by database constraint."}
+
+
+@router.get("/evaluate")
+def run_batch_evaluation_benchmark(seed: int = 101):
+    """
+    Executes a deterministic synthetic batch evaluation over 10,000 events
+    and reports precision, recall, safety, lift, and cost analysis.
+    """
+    try:
+        from packages.evaluation.benchmark_runner import EvaluationRunner
+        return EvaluationRunner.run_batch_evaluation(seed=seed)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Batch evaluation run failed: {str(e)}"
+        )
+

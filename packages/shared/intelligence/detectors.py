@@ -193,6 +193,108 @@ class PaymentLinkExpiryDetector(BaseOpportunityDetector):
         return candidates
 
 
+class CheckoutSessionAbandonmentDetector(BaseOpportunityDetector):
+    """Detects abandoned checkout sessions."""
+    
+    @property
+    def detector_type(self) -> str:
+        return "checkout_abandonment"
+
+    def detect_candidates(self, db: Session, merchant_id: str) -> List[OpportunityCandidate]:
+        from packages.database.models import CheckoutSession
+        sessions = (
+            db.query(CheckoutSession)
+            .filter(CheckoutSession.merchant_id == merchant_id, CheckoutSession.status == "ABANDONED")
+            .limit(50)
+            .all()
+        )
+
+        candidates = []
+        for sess in sessions:
+            candidates.append(
+                OpportunityCandidate(
+                    source_type=self.detector_type,
+                    source_reference=sess.session_token,
+                    merchant_id=sess.merchant_id,
+                    customer_id=sess.customer_id or "cust_unknown",
+                    amount_at_risk=sess.cart_amount,
+                    currency=sess.currency,
+                    detected_at=sess.last_activity_at,
+                    expires_at=sess.expires_at,
+                    metadata={"session_depth": sess.session_depth}
+                )
+            )
+        return candidates
+
+
+class ReceivableOverdueDetector(BaseOpportunityDetector):
+    """Detects overdue receivables."""
+    
+    @property
+    def detector_type(self) -> str:
+        return "overdue_receivable"
+
+    def detect_candidates(self, db: Session, merchant_id: str) -> List[OpportunityCandidate]:
+        from packages.database.models import Receivable
+        receivables = (
+            db.query(Receivable)
+            .filter(Receivable.merchant_id == merchant_id, Receivable.status == "OVERDUE")
+            .limit(50)
+            .all()
+        )
+
+        candidates = []
+        for rec in receivables:
+            candidates.append(
+                OpportunityCandidate(
+                    source_type=self.detector_type,
+                    source_reference=rec.id,
+                    merchant_id=rec.merchant_id,
+                    customer_id=rec.customer_id,
+                    amount_at_risk=rec.amount_in_minor,
+                    currency=rec.currency,
+                    detected_at=rec.created_at,
+                    expires_at=rec.due_date + timedelta(days=30),
+                    metadata={"days_overdue": rec.days_overdue}
+                )
+            )
+        return candidates
+
+
+class PromiseToPayBrokenDetector(BaseOpportunityDetector):
+    """Detects broken promises to pay and generates new opportunities."""
+    
+    @property
+    def detector_type(self) -> str:
+        return "promise_to_pay"
+
+    def detect_candidates(self, db: Session, merchant_id: str) -> List[OpportunityCandidate]:
+        from packages.database.models import PromiseToPay
+        promises = (
+            db.query(PromiseToPay)
+            .filter(PromiseToPay.merchant_id == merchant_id, PromiseToPay.status == "BROKEN")
+            .limit(50)
+            .all()
+        )
+
+        candidates = []
+        for p in promises:
+            candidates.append(
+                OpportunityCandidate(
+                    source_type=self.detector_type,
+                    source_reference=p.id,
+                    merchant_id=p.merchant_id,
+                    customer_id=p.customer_id,
+                    amount_at_risk=p.amount_in_minor,
+                    currency=p.currency,
+                    detected_at=p.promise_date,
+                    expires_at=p.promise_date + timedelta(days=14),
+                    metadata={"receivable_id": p.receivable_id}
+                )
+            )
+        return candidates
+
+
 class DetectorRegistry:
     """Registry managing pluggable detectors."""
     
@@ -204,6 +306,9 @@ class DetectorRegistry:
         self.register(SubscriptionFailureDetector())
         self.register(OverdueInvoiceDetector())
         self.register(PaymentLinkExpiryDetector())
+        self.register(CheckoutSessionAbandonmentDetector())
+        self.register(ReceivableOverdueDetector())
+        self.register(PromiseToPayBrokenDetector())
 
     def register(self, detector: BaseOpportunityDetector) -> None:
         self._detectors[detector.detector_type] = detector
